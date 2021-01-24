@@ -10,16 +10,17 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:vscode-tsv.helloWorld"
+		"onLanguage:tsv"
 	],
 	"main": "./dist/extension.js",
 	"contributes": {
-		"commands": [
-			{
-				"command": "vscode-tsv.helloWorld",
-				"title": "Hello World"
+		"configurationDefaults": {
+			"[tsv]": {
+				"editor.wordWrap": "off",
+				"editor.detectIndentation": false,
+				"editor.insertSpaces": false
 			}
-		]
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run package",
