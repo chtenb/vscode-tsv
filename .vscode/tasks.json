@@ -5,29 +5,14 @@
 	"tasks": [
 		{
 			"type": "npm",
-			"script": "watch",
-			"problemMatcher": [
-                "$ts-webpack-watch",
-                "$tslint-webpack-watch"
-			],
-			"isBackground": true,
-			"presentation": {
-				"reveal": "never"
-			},
+			"script": "compile",
 			"group": {
 				"kind": "build",
 				"isDefault": true
-			}
-		},
-		{
-			"type": "npm",
-			"script": "test-watch",
-			"problemMatcher": "$tsc-watch",
-			"isBackground": true,
-			"presentation": {
-				"reveal": "never"
 			},
-			"group": "build"
+			"problemMatcher": [],
+			"label": "npm: compile",
+			"detail": "webpack --config ./build/node-extension.webpack.config.js"
 		}
 	]
 }

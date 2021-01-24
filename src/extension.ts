@@ -4,8 +4,11 @@ import * as vscode from 'vscode';
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 	let disposables = [
-		vscode.window.onDidChangeActiveTextEditor((editor) => {
-			adjustTabSize(editor);
+		vscode.workspace.onDidOpenTextDocument(() => {
+			adjustTabSize(vscode.window.activeTextEditor);
+		}),
+		vscode.window.onDidChangeActiveTextEditor(() => {
+			adjustTabSize(vscode.window.activeTextEditor);
 		}),
 		vscode.workspace.onDidSaveTextDocument(() => {
 			adjustTabSize(vscode.window.activeTextEditor);
