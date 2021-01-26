@@ -1,33 +1,50 @@
 import * as vscode from 'vscode';
 
 // this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+	const updateDecorations = (editor: vscode.TextEditor | undefined) => {
+		if (!editor) {
+			return;
+		}
+		if (editor.document.languageId! !== "tsv") {
+			return;
+		}
+
+		let pattern = /[^\t]*\t/g;
+		let maxColumnWidth = 1;
+		for (const range of editor.visibleRanges) {
+			const extendedRangeStart = new vscode.Position(Math.max(0, range.start.line - 1), 0);
+			const extendedRangeEnd = new vscode.Position(range.end.line + 1, 0);
+			const extendedRange = new vscode.Range(extendedRangeStart, extendedRangeEnd);
+			const lines = editor.document.getText(extendedRange).split(/\r\n|\r|\n/);
+			for (const line of lines) {
+				let match;
+				while ((match = pattern.exec(line)) !== null) {
+					maxColumnWidth = Math.max(match[0].length, maxColumnWidth);
+				}
+			}
+		}
+
+		editor.options.tabSize = maxColumnWidth + 1;
+	};
+
+	let timer: NodeJS.Timer;
+	const delayedUpdateDecorations = () => {
+		vscode.window.showInformationMessage('Hello World from vscode-tsv!');
+		if (timer) {
+			clearTimeout(timer);
+		}
+		timer = setTimeout(() => { updateDecorations(vscode.window.activeTextEditor); }, 100);
+	};
+
 	let disposables = [
-		vscode.workspace.onDidOpenTextDocument(() => {
-			adjustTabSize(vscode.window.activeTextEditor);
-		}),
-		vscode.window.onDidChangeActiveTextEditor(() => {
-			adjustTabSize(vscode.window.activeTextEditor);
-		}),
-		vscode.workspace.onDidSaveTextDocument(() => {
-			adjustTabSize(vscode.window.activeTextEditor);
-		})
+		vscode.workspace.onDidOpenTextDocument(delayedUpdateDecorations, null, context.subscriptions),
+		vscode.workspace.onDidChangeTextDocument(delayedUpdateDecorations, null, context.subscriptions),
+		vscode.window.onDidChangeActiveTextEditor(delayedUpdateDecorations, null, context.subscriptions),
+		vscode.window.onDidChangeTextEditorVisibleRanges(delayedUpdateDecorations, null, context.subscriptions),
 	];
 	context.subscriptions.push(...disposables);
-}
 
-function adjustTabSize(editor: vscode.TextEditor | undefined) {
-	if (!editor) {
-		return;
-	}
-	if (editor.document.languageId !== "tsv") {
-		return;
-	}
-	let text = editor.document.getText();
-	let cellSizes = text.split(/\r\n|\r|\n|\t/).map(cell => cell.length);
-	let maxCellSize = Math.max(...cellSizes);
-	editor.options.tabSize = maxCellSize + 1;
 }
 
 // this method is called when your extension is deactivated
