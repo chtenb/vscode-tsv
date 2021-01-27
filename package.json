@@ -12,7 +12,8 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onLanguage:tsv"
+		"onLanguage:tsv",
+		"onLanguage:csv"
 	],
 	"main": "./dist/extension.js",
 	"contributes": {
@@ -21,8 +22,36 @@
 				"editor.wordWrap": "off",
 				"editor.detectIndentation": false,
 				"editor.insertSpaces": false
+			},
+			"[csv]": {
+				"editor.wordWrap": "off",
+				"editor.detectIndentation": false,
+				"editor.insertSpaces": false
 			}
-		}
+		},
+		"languages": [
+			{
+				"id": "tsv",
+				"aliases": [
+					"TSV",
+					"tsv"
+				],
+				"extensions": [
+					".tsv",
+					".tab"
+				]
+			},
+			{
+				"id": "csv",
+				"aliases": [
+					"CSV",
+					"csv"
+				],
+				"extensions": [
+					".csv"
+				]
+			}
+		]
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run package",
