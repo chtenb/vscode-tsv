@@ -4,7 +4,8 @@ import * as vscode from 'vscode';
 export function activate(context: vscode.ExtensionContext) {
 	let decorationTypes: vscode.TextEditorDecorationType[] = [];
 	let decorationRanges: vscode.Range[][] = [];
-	for (let index = 0; index < 100; index++) {
+	const MAX_DECORATION_WITH = 100;
+	for (let index = 0; index < MAX_DECORATION_WITH; index++) {
 		decorationTypes[index] = vscode.window.createTextEditorDecorationType({ after: { contentText: "\xa0".repeat(index) } });
 		decorationRanges[index] = [];
 	}
@@ -31,7 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
 			// pattern = /(?:^|,)(?=[^"]|(")?)"?((?(1)[^"]*|[^,"]*))"?(?=,|$)/g;
 		}
 
-		for (let index = 0; index < 100; index++) {
+		for (let index = 0; index < MAX_DECORATION_WITH; index++) {
 			decorationRanges[index] = [];
 		}
 
@@ -64,7 +65,7 @@ export function activate(context: vscode.ExtensionContext) {
 				lineIndex++;
 			}
 
-			for (let index = 0; index < 100; index++) {
+			for (let index = 0; index < MAX_DECORATION_WITH; index++) {
 				editor.setDecorations(decorationTypes[index], decorationRanges[index]);
 			}
 		}
