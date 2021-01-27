@@ -1,9 +1,9 @@
 {
-	"name": "vscode-tsv",
-	"displayName": "vscode-tsv",
+	"name": "vscode-dsv-align",
+	"displayName": "vscode-dsv-align",
 	"description": "Automatically adjust the tabsize based on the widest column content within the file.",
 	"publisher": "ctenbrinke",
-	"repository": "https://github.com/Chiel92/vscode-tsv",
+	"repository": "https://github.com/Chiel92/vscode-dsv-align",
 	"version": "0.0.1",
 	"engines": {
 		"vscode": "^1.52.0"

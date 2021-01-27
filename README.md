@@ -1,4 +1,4 @@
-# vscode-tsv README
+# vscode-dsv-align README
 
 ## Features
 
