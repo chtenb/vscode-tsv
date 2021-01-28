@@ -30,7 +30,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 	let timer: NodeJS.Timer;
 	const delayedUpdateDecorations = () => {
-		vscode.window.showInformationMessage('Hello World from vscode-tsv!');
 		if (timer) {
 			clearTimeout(timer);
 		}
