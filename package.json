@@ -1,18 +1,16 @@
 {
-    "name": "vscode-dsv-align",
-    "displayName": "vscode-dsv-align",
+    "name": "vscode-tsv",
+    "displayName": "vscode-tsv",
     "description": "Automatically align cells from the same column without modifying the file.",
     "publisher": "ctenbrinke",
-    "repository": "https://github.com/Chiel92/vscode-dsv-align",
+    "repository": "https://github.com/Chiel92/vscode-tsv",
     "version": "0.0.1",
     "engines": {
         "vscode": "^1.52.0"
     },
     "license": "MIT",
     "keywords": [
-        "csv",
         "tsv",
-        "dsv",
         "align",
         "column"
     ],
@@ -22,7 +20,6 @@
         "Programming Languages"
     ],
     "activationEvents": [
-        "onLanguage:csv",
         "onLanguage:tsv"
     ],
     "main": "./dist/extension.js",
@@ -32,24 +29,9 @@
                 "editor.wordWrap": "off",
                 "editor.detectIndentation": false,
                 "editor.insertSpaces": false
-            },
-            "[csv]": {
-                "editor.wordWrap": "off",
-                "editor.detectIndentation": false,
-                "editor.insertSpaces": false
             }
         },
         "languages": [
-            {
-                "id": "csv",
-                "aliases": [
-                    "CSV",
-                    "csv"
-                ],
-                "extensions": [
-                    ".csv"
-                ]
-            },
             {
                 "id": "tsv",
                 "aliases": [
