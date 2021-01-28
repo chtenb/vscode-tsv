@@ -2,43 +2,43 @@ import * as vscode from 'vscode';
 
 // this method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
+	// Decoration types are very expensive to make, so we create them once and then reuse them.
+	// The decoration types are indexed by the amount of spaces they add.
 	let decorationTypes: vscode.TextEditorDecorationType[] = [];
 	let decorationRanges: vscode.Range[][] = [];
-	const MAX_DECORATION_WITH = 100;
-	for (let index = 0; index < MAX_DECORATION_WITH; index++) {
+	const MAX_DECORATION_WIDTH = 100;
+
+	for (let index = 0; index < MAX_DECORATION_WIDTH; index++) {
 		decorationTypes[index] = vscode.window.createTextEditorDecorationType({ after: { contentText: "\xa0".repeat(index) } });
+		// decorationTypes[index] = vscode.window.createTextEditorDecorationType({ after: { contentText: "\t" } });
 		decorationRanges[index] = [];
 	}
 
-	const addDecorations = function (editor: vscode.TextEditor | undefined) {
+	const updateDecorations = (editor: vscode.TextEditor | undefined) => {
 		if (!editor) {
 			return;
 		}
 		if (editor.document.languageId! in ["csv", "tsv"]) {
 			return;
 		}
-		editor.options.tabSize = 1;
 
-		// TODO: restrict to DSV files
-		let pattern = /[^\t]*\t/g;
-		if (editor.document.languageId === "csv") {
-			// Check to see if the delimiter is defined. If not,
-			// then default to comma.
-			let strDelimiter = (undefined || ",");
-
-			// Create a regular expression to parse the CSV values.
-			// pattern = new RegExp(("(\\,|\\r?\\n|\\r|^)(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|([^\\,\\r\\n]*))"),"gi");
-			pattern = /[^,]*,/g;
-			// pattern = /(?:^|,)(?=[^"]|(")?)"?((?(1)[^"]*|[^,"]*))"?(?=,|$)/g;
+		let pattern = /[^,]*,/g;
+		if (editor.document.languageId === "tsv") {
+			editor.options.tabSize = 1;
+			pattern = /[^\t]*\t/g;
 		}
 
-		for (let index = 0; index < MAX_DECORATION_WITH; index++) {
+		for (let index = 0; index < MAX_DECORATION_WIDTH; index++) {
 			decorationRanges[index] = [];
 		}
 
 		for (const range of editor.visibleRanges) {
 			const columnWidths: number[] = [];
-			const lines = editor.document.getText(range).split(/\r\n|\r|\n/);
+			const rangeLineCount = range.end.line - range.start.line;
+			const extendedRangeStart = new vscode.Position(Math.max(0, range.start.line - rangeLineCount), 0);
+			const extendedRangeEnd = new vscode.Position(range.end.line + rangeLineCount, 0);
+			const extendedRange = new vscode.Range(extendedRangeStart, extendedRangeEnd);
+			const lines = editor.document.getText(extendedRange).split(/\r\n|\r|\n/);
 			for (const line of lines) {
 				let columnIndex = 0;
 				let match;
@@ -55,8 +55,8 @@ export function activate(context: vscode.ExtensionContext) {
 				while ((match = pattern.exec(line)) !== null) {
 					const matchText = match[0];
 					const matchLength = matchText.length;
-					const endPos = new vscode.Position(lineIndex + range.start.line, match.index + matchLength);
-					const spaces = columnWidths[columnIndex] - matchLength;
+					const endPos = new vscode.Position(lineIndex + extendedRange.start.line, match.index + matchLength);
+					const spaces = columnWidths[columnIndex] - matchLength + 1;
 					const decRange = new vscode.Range(endPos, endPos);
 					decorationRanges[spaces].push(decRange);
 					columnIndex++;
@@ -64,30 +64,30 @@ export function activate(context: vscode.ExtensionContext) {
 
 				lineIndex++;
 			}
+		}
 
-			for (let index = 0; index < MAX_DECORATION_WITH; index++) {
-				editor.setDecorations(decorationTypes[index], decorationRanges[index]);
-			}
+		for (let index = 0; index < MAX_DECORATION_WIDTH; index++) {
+			editor.setDecorations(decorationTypes[index], decorationRanges[index]);
+			// if (decorationRanges[index].length > 0) {
+			// 	editor.options.tabSize = index;
+			// }
 		}
 	};
 
 	let timer: NodeJS.Timer;
+	const delayedUpdateDecorations = () => {
+		vscode.window.showInformationMessage('Hello World from vscode-tsv!');
+		if (timer) {
+			clearTimeout(timer);
+		}
+		timer = setTimeout(() => { updateDecorations(vscode.window.activeTextEditor); }, 100);
+	};
+
 	let disposables = [
-		// vscode.window.onDidChangeActiveTextEditor(() => {
-		// 	addDecorations(vscode.window.activeTextEditor);
-		// }),
-		// vscode.workspace.onDidOpenTextDocument(() => {
-		// 	addDecorations(vscode.window.activeTextEditor);
-		// }),
-		// vscode.workspace.onDidSaveTextDocument(() => {
-		// 	addDecorations(vscode.window.activeTextEditor);
-		// }),
-		vscode.window.onDidChangeTextEditorVisibleRanges(() => {
-			if (timer) {
-				clearTimeout(timer);
-			}
-			timer = setTimeout(() => { addDecorations(vscode.window.activeTextEditor); }, 100);
-		}, null, context.subscriptions),
+		vscode.workspace.onDidOpenTextDocument(delayedUpdateDecorations, null, context.subscriptions),
+		vscode.workspace.onDidChangeTextDocument(delayedUpdateDecorations, null, context.subscriptions),
+		vscode.window.onDidChangeActiveTextEditor(delayedUpdateDecorations, null, context.subscriptions),
+		vscode.window.onDidChangeTextEditorVisibleRanges(delayedUpdateDecorations, null, context.subscriptions),
 	];
 	context.subscriptions.push(...disposables);
 
