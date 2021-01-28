@@ -4,34 +4,42 @@ import * as vscode from 'vscode';
 export function activate(context: vscode.ExtensionContext) {
 	// Decoration types are very expensive to make, so we create them once and then reuse them.
 	// The decoration types are indexed by the amount of spaces they add.
-	let decorationTypes: vscode.TextEditorDecorationType[] = [];
-	let decorationRanges: vscode.Range[][] = [];
-	const MAX_DECORATION_WIDTH = 100;
+	let decorationTypes: vscode.TextEditorDecorationType[][] = [];
+	let decorationRanges: vscode.Range[][][] = [];
+	const MAX_DECORATION_WIDTH = 50;
 
-	for (let index = 0; index < MAX_DECORATION_WIDTH; index++) {
-		decorationTypes[index] = vscode.window.createTextEditorDecorationType({ after: { contentText: "\xa0".repeat(index) } });
-		// decorationTypes[index] = vscode.window.createTextEditorDecorationType({ after: { contentText: "\t" } });
-		decorationRanges[index] = [];
+	for (let from = 1; from < MAX_DECORATION_WIDTH; from++) {
+		decorationTypes[from] = [];
+		decorationRanges[from] = [];
+		for (let to = 0; to < MAX_DECORATION_WIDTH; to++) {
+			// decorationTypes[from][to] = vscode.window.createTextEditorDecorationType({ border: "1px solid red",  letterSpacing: "-0px", before: { contentText: "X".repeat(1) }});
+			decorationTypes[from][to] = vscode.window.createTextEditorDecorationType({ border: "1px solid red",  letterSpacing: "1ch"});
+			// decorationTypes[from][to] = vscode.window.createTextEditorDecorationType({ border: "1px solid red",  after: { contentText: "X".repeat(1), margin: -5 + "ch", width:"0px" }  });
+			// decorationTypes[index] = vscode.window.createTextEditorDecorationType({ after: { contentText: "\b".repeat(index) } });
+			// decorationTypes[index] = vscode.window.createTextEditorDecorationType({ letterSpacing: -index + "pc" });
+			// decorationTypes[index] = vscode.window.createTextEditorDecorationType({ after: { contentText: "x".repeat(index) } });
+			// decorationTypes[index] = vscode.window.createTextEditorDecorationType({ letterSpacing: -index + "ch" });
+			// decorationTypes[index] = vscode.window.createTextEditorDecorationType({ after: { contentText: "\xa0".repeat(index) } });
+			// decorationTypes[index] = vscode.window.createTextEditorDecorationType({ after: { contentText: "\t" } });
+		}
 	}
 
 	const updateDecorations = (editor: vscode.TextEditor | undefined) => {
 		if (!editor) {
 			return;
 		}
-		if (editor.document.languageId! in ["csv", "tsv"]) {
+		if (editor.document.languageId! !== "tsv") {
 			return;
 		}
 
-		let pattern = /[^,]*,/g;
-		if (editor.document.languageId === "tsv") {
-			editor.options.tabSize = 1;
-			pattern = /[^\t]*\t/g;
+
+		for (let from = 1; from < MAX_DECORATION_WIDTH; from++) {
+			for (let to = 0; to < MAX_DECORATION_WIDTH; to++) {
+				decorationRanges[from][to] = [];
+			}
 		}
 
-		for (let index = 0; index < MAX_DECORATION_WIDTH; index++) {
-			decorationRanges[index] = [];
-		}
-
+		let pattern = /[^\t]*\t/g;
 		for (const range of editor.visibleRanges) {
 			const columnWidths: number[] = [];
 			const rangeLineCount = range.end.line - range.start.line;
@@ -48,6 +56,9 @@ export function activate(context: vscode.ExtensionContext) {
 				}
 			}
 
+			let maxColumnWidth = Math.max(...columnWidths)
+			editor.options.tabSize = maxColumnWidth + 1;
+
 			let lineIndex = 0;
 			for (const line of lines) {
 				let match;
@@ -56,9 +67,10 @@ export function activate(context: vscode.ExtensionContext) {
 					const matchText = match[0];
 					const matchLength = matchText.length;
 					const endPos = new vscode.Position(lineIndex + extendedRange.start.line, match.index + matchLength);
-					const spaces = columnWidths[columnIndex] - matchLength + 1;
-					const decRange = new vscode.Range(endPos, endPos);
-					decorationRanges[spaces].push(decRange);
+					const currentTabWidth = maxColumnWidth - matchLength + 1;
+					const targetTabWidth = columnWidths[columnIndex] - matchLength + 1;
+					const decRange = new vscode.Range(endPos.translate(0, -1), endPos);
+					decorationRanges[currentTabWidth][targetTabWidth].push(decRange);
 					columnIndex++;
 				}
 
@@ -66,11 +78,10 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 		}
 
-		for (let index = 0; index < MAX_DECORATION_WIDTH; index++) {
-			editor.setDecorations(decorationTypes[index], decorationRanges[index]);
-			// if (decorationRanges[index].length > 0) {
-			// 	editor.options.tabSize = index;
-			// }
+		for (let from = 1; from < MAX_DECORATION_WIDTH; from++) {
+			for (let to = 0; to < MAX_DECORATION_WIDTH; to++) {
+				editor.setDecorations(decorationTypes[from][to], decorationRanges[from][to]);
+			}
 		}
 	};
 
