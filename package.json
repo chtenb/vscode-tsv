@@ -1,10 +1,10 @@
 {
     "name": "vscode-tsv",
     "displayName": "vscode-tsv",
-    "description": "Automatically align cells from the same column without modifying the file.",
+    "description": "Automatically set the tabsize to align column cells without modifying the file.",
     "publisher": "ctenbrinke",
     "repository": "https://github.com/Chiel92/vscode-tsv",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "engines": {
         "vscode": "^1.52.0"
     },
