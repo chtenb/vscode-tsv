@@ -2,11 +2,32 @@ import * as vscode from 'vscode';
 
 // this method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
-	const updateDecorations = (editor: vscode.TextEditor | undefined) => {
+	const disabledForFiles = new Set();
+
+	let disposableCommand = vscode.commands.registerCommand('extension.toggleEnabled', () => {
+		let editor = vscode.window.activeTextEditor;
 		if (!editor) {
 			return;
 		}
 		if (editor.document.languageId! !== "tsv") {
+			return;
+		}
+		if (disabledForFiles.has(editor.document.uri)) {
+			// Enable again
+			disabledForFiles.delete(editor.document.uri);
+			updateDecorations(vscode.window.activeTextEditor);
+		} else {
+			// Disable
+			disabledForFiles.add(editor.document.uri);
+			editor.options.tabSize = 1;
+		}
+	});
+
+	const updateDecorations = (editor: vscode.TextEditor | undefined) => {
+		if (!editor) {
+			return;
+		}
+		if (editor.document.languageId! !== "tsv" || disabledForFiles.has(editor.document.uri)) {
 			return;
 		}
 
@@ -37,6 +58,7 @@ export function activate(context: vscode.ExtensionContext) {
 	};
 
 	let disposables = [
+		disposableCommand,
 		vscode.workspace.onDidOpenTextDocument(delayedUpdateDecorations, null, context.subscriptions),
 		vscode.workspace.onDidChangeTextDocument(delayedUpdateDecorations, null, context.subscriptions),
 		vscode.window.onDidChangeActiveTextEditor(delayedUpdateDecorations, null, context.subscriptions),

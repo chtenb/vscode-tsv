@@ -1,6 +1,6 @@
 {
     "name": "vscode-tsv",
-    "displayName": "vscode-tsv",
+    "displayName": "VSCode TSV",
     "description": "Automatically set the tabsize to align column cells without modifying the file.",
     "publisher": "ctenbrinke",
     "repository": "https://github.com/Chiel92/vscode-tsv",
@@ -24,6 +24,12 @@
     ],
     "main": "./dist/extension.js",
     "contributes": {
+        "commands": [
+            {
+                "command": "extension.toggleEnabled",
+                "title": "Toggle VSCode-TSV On/Off For Current File"
+            }
+        ],
         "configurationDefaults": {
             "[tsv]": {
                 "editor.wordWrap": "off",
