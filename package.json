@@ -4,7 +4,7 @@
     "description": "Automatically set the tabsize to align column cells without modifying the file.",
     "publisher": "ctenbrinke",
     "repository": "https://github.com/Chiel92/vscode-tsv",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "engines": {
         "vscode": "^1.52.0"
     },
