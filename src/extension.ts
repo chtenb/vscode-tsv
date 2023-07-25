@@ -66,6 +66,7 @@ export function activate(context: vscode.ExtensionContext) {
 	];
 	context.subscriptions.push(...disposables);
 
+	delayedUpdateDecorations();
 }
 
 // this method is called when your extension is deactivated
