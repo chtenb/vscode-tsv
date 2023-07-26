@@ -31,7 +31,7 @@ export function activate(context: vscode.ExtensionContext) {
 			return;
 		}
 
-		let pattern = /[^\t]*\t/g;
+		let pattern = /([^\t]+)(\t|$)/g;
 		let maxColumnWidth = 1;
 		for (const range of editor.visibleRanges) {
 			const extendedRangeStart = new vscode.Position(Math.max(0, range.start.line - 1), 0);
@@ -41,12 +41,12 @@ export function activate(context: vscode.ExtensionContext) {
 			for (const line of lines) {
 				let match;
 				while ((match = pattern.exec(line)) !== null) {
-					maxColumnWidth = Math.max(match[0].length, maxColumnWidth);
+					maxColumnWidth = Math.max(match[1].length, maxColumnWidth);
 				}
 			}
 		}
 
-		editor.options.tabSize = maxColumnWidth + 1;
+		editor.options.tabSize = maxColumnWidth + 2;
 	};
 
 	let timer: NodeJS.Timer;
@@ -66,6 +66,7 @@ export function activate(context: vscode.ExtensionContext) {
 	];
 	context.subscriptions.push(...disposables);
 
+	delayedUpdateDecorations();
 }
 
 // this method is called when your extension is deactivated
