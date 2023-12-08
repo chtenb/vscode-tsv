@@ -39,6 +39,10 @@ export function activate(context: vscode.ExtensionContext) {
 			const extendedRange = new vscode.Range(extendedRangeStart, extendedRangeEnd);
 			const lines = editor.document.getText(extendedRange).split(/\r\n|\r|\n/);
 			for (const line of lines) {
+				// Skip comment lines
+				if (line.trim().startsWith("#")) {
+					continue;
+				}
 				let match;
 				while ((match = pattern.exec(line)) !== null) {
 					maxColumnWidth = Math.max(match[1].length, maxColumnWidth);
