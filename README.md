@@ -10,7 +10,7 @@
 
 ```
 npm install
-npm install -g @vscode-vsce
+npm install -g vsce
 vsce package
 code --install-extension vscode-tsv-xxxx.vsix
 ```
